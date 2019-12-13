@@ -30,14 +30,7 @@ def detect_rect(image):
     return cv2.boundingRect(contours[0])
     
 
-
-def main():
-
-    initial_image = cv2.imread("./images/t2.jpg")
-    
-    cv2.namedWindow("Initial", cv2.WINDOW_NORMAL)
-    cv2.imshow("Initial", initial_image)
-    cv2.waitKey(0)
+def preprocess(initial_image):
     
     gray = image_grayscale(initial_image)
     
@@ -47,15 +40,27 @@ def main():
     
     canny = image_canny(thresh)
     
-    [x, y, w, h] = detect_rect(canny)
+    return canny
 
-    final_image = initial_image.copy()
-    cv2.rectangle(final_image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+def main():
+
+    initial_image = cv2.imread("./images/image.png")
+    
+    cv2.namedWindow("Initial", cv2.WINDOW_NORMAL)
+    cv2.imshow("Initial", initial_image)
+    cv2.waitKey(0)
+    
+    preprocessed = preprocess(initial_image)
+    
+    [x, y, w, h] = detect_rect(preprocessed)
+
+    final_image = initial_image[y:y+h, x:x+w]
     
     cv2.namedWindow("Final", cv2.WINDOW_NORMAL)
     cv2.imshow("Final", final_image)
     cv2.waitKey(0)
     
-
+    
 if __name__ == "__main__":
     main()
