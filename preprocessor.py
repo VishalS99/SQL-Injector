@@ -12,7 +12,7 @@ def image_blur(image):
 
 def image_thresholding(image):
     return cv2.threshold(
-        image, 180, 255, cv2.THRESH_BINARY_INV)[1]
+        image, 150, 255, cv2.THRESH_BINARY_INV)[1]
 
 
 def image_canny(image):
@@ -52,16 +52,11 @@ def preprocess(initial_image):
 def prep_main():
 
     initial_image = cv2.imread("./images/image.png")
-
-    cv2.namedWindow("Initial", cv2.WINDOW_NORMAL)
-    cv2.imshow("Initial", initial_image)
-    cv2.waitKey(0)
-
     preprocessed = preprocess(initial_image)
 
     [x, y, w, h] = detect_rect(preprocessed)
 
-    final_image = initial_image[y:y+h, x:x+w]
+    final_image = initial_image[y-5:y+h+5, x-5:x+w+5]
 
     return final_image
 
