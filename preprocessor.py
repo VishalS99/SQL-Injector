@@ -7,7 +7,12 @@ def image_grayscale(image):
 
 
 def image_blur(image):
-    return cv2.bilateralFilter(image, 9, 75, 75)
+    return cv2.GaussianBlur(image, (3, 3), cv2.BORDER_DEFAULT)
+
+
+def image_dilation(thresh):
+    kernel = np.ones((5, 5), np.uint8)
+    return cv2.dilate(thresh, kernel, iterations=1)
 
 
 def image_thresholding(image):
@@ -44,21 +49,39 @@ def preprocess(initial_image):
 
     thresh = image_thresholding(blur)
 
-    canny = image_canny(thresh)
+    thresh = image_dilation(thresh)
 
+    print("## Cropped image and saved")
+    cv2.namedWindow("Final", cv2.WINDOW_NORMAL)
+    cv2.imshow("Final", thresh)
+
+    canny = image_canny(thresh)
+    print("## Cropped image and saved")
+    cv2.namedWindow("fa", cv2.WINDOW_NORMAL)
+    cv2.imshow("fa", canny)
     return canny
 
 
-def prep_main():
+# def prep_main():
 
-    initial_image = cv2.imread("./images/image.png")
-    preprocessed = preprocess(initial_image)
+    # initial_image = cv2.imread("./images/table2.png")
 
-    [x, y, w, h] = detect_rect(preprocessed)
+    # initial_image = cv2.copyMakeBorder(
+    #     initial_image, 20, 20, 20, 20, cv2.BORDER_CONSTANT, (0, 0, 0))
 
-    final_image = initial_image[y-5:y+h+5, x-5:x+w+5]
+    # preprocessed = preprocess(initial_image)
 
-    return final_image
+    # [x, y, w, h] = detect_rect(preprocessed)
+
+    # final_image = initial_image[y-5:y+h+5, x-5:x+w+5]
+    # print("## Cropped image and saved")
+    # cv2.namedWindow("Final", cv2.WINDOW_NORMAL)
+    # cv2.imshow("Final", final_image)
+
+    # cv2.waitKey(0)
+
+    # return final_image
+
 
 # if __name__ == "__main__":
 #     prep_main()

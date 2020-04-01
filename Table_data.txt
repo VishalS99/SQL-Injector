@@ -1,0 +1,7 @@
+HEADING: 
+Name	FName	City		Salary	
+Smith	John		35	$280	
+Doe	Jane		28	$325	
+Brown	Scott		41	$265	
+Howard	Shemp		48	$359	
+Taylor	Tom	o		$250	

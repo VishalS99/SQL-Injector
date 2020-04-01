@@ -46,7 +46,8 @@ def detect_cells(image, orig):
         x, y, w, h = cv2.boundingRect(cnt)
 
         if h < max_height_threshold and h > min_height_threshold and w < 300:
-            table = cv2.rectangle(orig, (x, y), (x+w, y+h), (0, 0, 255), 1)
+            table = cv2.rectangle(
+                orig, (x-2, y-2), (x+w+2, y+h+2), (0, 0, 255), 1)
             box.append([x, y, w, h])
             final_image = table
     return (orig, box)
@@ -66,13 +67,13 @@ def extract_cell_loc(image, box):
             countcol += 1
     countrow = int(len(box) / countcol)
 
+    print("### Detection of table titles")
     for i in range(countcol):
         (x, y, w, h) = box[i]
         text_image = image[y: y+h, x: x+w]
-
-        text_image = image_grayscale(text_image)
-        resizing = cv2.resize(text_image, None, fx=2, fy=2,
-                              interpolation=cv2.INTER_AREA)
+        text_image = cv2.resize(text_image, None, fx=2, fy=2,
+                                interpolation=cv2.INTER_CUBIC)
+        resizing = image_grayscale(text_image)
         text = pytesseract.image_to_string(resizing)
         if(len(text) == 0):
             out = pytesseract.image_to_string(
@@ -80,24 +81,30 @@ def extract_cell_loc(image, box):
 
         table_headings.append(text.replace("\n", ' '))
     table_headings.reverse()
+    print("=======> Heading Entry:", table_headings, "\n")
 
+    print("### Detection of table entries")
     for i in range(1, countrow):
         row_entry = []
         for j in range(countcol):
             (x, y, w, h) = box[countcol*i + j]
             text_image = image[y: y+h, x: x+w]
 
-            text_image = image_grayscale(text_image)
-            resizing = cv2.resize(text_image, None, fx=2, fy=2,
-                                  interpolation=cv2.INTER_AREA)
+            text_image = cv2.resize(text_image, None, fx=2, fy=2,
+                                    interpolation=cv2.INTER_CUBIC)
+            resizing = image_grayscale(text_image)
+            # resizing = cv2.threshold(
+            #     text_image, 180, 255,  cv2.THRESH_BINARY)[1]
+            # resizing = cv2.medianBlur(resizing, 3)
 
             text = pytesseract.image_to_string(resizing)
             if(len(text) == 0):
                 text = pytesseract.image_to_string(
-                    resizing, config='--psm 3 --oem 3')
+                    resizing, config='--psm 3')
 
             row_entry.append(text.replace("\n", ' '))
         row_entry.reverse()
+        print("=======> Row Entry: ", row_entry, "\n")
         table_row_elements.append(row_entry)
 
     return (table_headings, table_row_elements)
@@ -115,12 +122,26 @@ def extract_cells(initial_image):
 
 
 def main():
-    intermediate_image = prep_main()
+    # initial_image = prep_main()
+    initial_image = cv2.imread("./images/tt.jpg")
+    if initial_image.shape[1] > 640 and initial_image.shape[0] > 640:
+        scale_percent = 40  # percent of original size
+        width = int(initial_image.shape[1] * scale_percent / 100)
+        height = int(initial_image.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        initial_image = cv2.resize(
+            initial_image, dim, interpolation=cv2.INTER_AREA)
 
-    final_image, box_data = extract_cells(intermediate_image)
+    print("## Initial preprocessing of the image")
+    print("## Extraction of table - Detection of cells")
+    final_image, box_data = extract_cells(initial_image)
     cv2.imwrite("extracted_tables/table.png", final_image)
+
+    print("## Extraction of table - Extraction of cell data")
     headings, row_entries = extract_cell_loc(final_image, box_data)
 
+    print("## Saving data in Table_data.txt")
+    open("Table_data.txt", "w").close()
     table_data = open("Table_data.txt", "a")
     table_data.write("HEADING: \n")
     for i in range(len(headings)):
