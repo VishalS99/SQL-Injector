@@ -136,8 +136,7 @@ def table_writeback(headings, row_entries):
     table_data.close()
 
 
-def main():
-    path = "./images/table.jpg"
+def extractor(path):
     print("## Importing image")
     try:
         f = open(path)
@@ -169,9 +168,4 @@ def main():
 
     print("## Saving data in Table_data.txt")
     table_writeback(headings, row_entries)
-
-
-if __name__ == "__main__":
-    print("### Sequel Injector ###\n")
-    main()
-    print("\n### Done ###")
+    return (headings, row_entries)
