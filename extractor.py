@@ -1,4 +1,4 @@
-import cv2
+import os
 import numpy as np
 from preprocessor import *
 
@@ -8,16 +8,21 @@ table_row_elements = []
 try:
     import pytesseract
 except:
-    print("Cannot import Tesseract")
+    print("Cannot import Tesseract, either it's not installed or there is some other error")
+
+try:
+    import cv2
+except:
+    print("Cannot import Opencv, either it's not installed or there is some other error")
 
 
-def sort_contours(cnts, method="left-to-right"):
+def sort_contours(cnts, method="l2r"):
 
     reverse = False
     i = 0
-    if method == "right-to-left" or method == "bottom-to-top":
+    if method == "r2l" or method == "b2t":
         reverse = True
-    if method == "top-to-bottom" or method == "bottom-to-top":
+    if method == "t2b" or method == "b2t":
         i = 1
     boundingBoxes = [cv2.boundingRect(c) for c in cnts]
     (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
@@ -25,16 +30,11 @@ def sort_contours(cnts, method="left-to-right"):
     return (cnts, boundingBoxes)
 
 
-def image_dilation(thresh):
-    kernel = np.ones((3, 3), np.uint8)
-    return cv2.dilate(thresh, kernel, iterations=1)
-
-
 def detect_cells(image, orig):
     contours = cv2.findContours(
         image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    contours, boundingBoxes = sort_contours(contours, "top-to-bottom")
+    contours, boundingBoxes = sort_contours(contours, "t2b")
     heights = [boundingBoxes[i][3] for i in range(len(boundingBoxes))]
 
     box = []
@@ -74,7 +74,8 @@ def extract_cell_loc(image, box):
         text_image = cv2.resize(text_image, None, fx=2, fy=2,
                                 interpolation=cv2.INTER_CUBIC)
         resizing = image_grayscale(text_image)
-        text = pytesseract.image_to_string(resizing)
+        text = pytesseract.image_to_string(
+            resizing, config="-l eng --oem 1 --psm 7")
         if(len(text) == 0):
             out = pytesseract.image_to_string(
                 resizing, config='--psm 3')
@@ -93,11 +94,8 @@ def extract_cell_loc(image, box):
             text_image = cv2.resize(text_image, None, fx=2, fy=2,
                                     interpolation=cv2.INTER_CUBIC)
             resizing = image_grayscale(text_image)
-            # resizing = cv2.threshold(
-            #     text_image, 180, 255,  cv2.THRESH_BINARY)[1]
-            # resizing = cv2.medianBlur(resizing, 3)
-
-            text = pytesseract.image_to_string(resizing)
+            text = pytesseract.image_to_string(
+                resizing, config="-l eng --oem 1 --psm 7")
             if(len(text) == 0):
                 text = pytesseract.image_to_string(
                     resizing, config='--psm 3')
@@ -110,37 +108,20 @@ def extract_cell_loc(image, box):
     return (table_headings, table_row_elements)
 
 
-def extract_cells(initial_image):
+def preprocess_and_extract_cells(initial_image):
 
     gray = image_grayscale(initial_image)
 
     thresh = image_thresholding(gray)
 
-    dilation = cv2.bitwise_not(image_dilation(thresh))
+    dilation = image_dilation(thresh)
 
-    return detect_cells(dilation, initial_image)
+    dilation_inv = image_inverse(dilation)
+
+    return detect_cells(dilation_inv, initial_image)
 
 
-def main():
-    # initial_image = prep_main()
-    initial_image = cv2.imread("./images/tt.jpg")
-    if initial_image.shape[1] > 640 and initial_image.shape[0] > 640:
-        scale_percent = 40  # percent of original size
-        width = int(initial_image.shape[1] * scale_percent / 100)
-        height = int(initial_image.shape[0] * scale_percent / 100)
-        dim = (width, height)
-        initial_image = cv2.resize(
-            initial_image, dim, interpolation=cv2.INTER_AREA)
-
-    print("## Initial preprocessing of the image")
-    print("## Extraction of table - Detection of cells")
-    final_image, box_data = extract_cells(initial_image)
-    cv2.imwrite("extracted_tables/table.png", final_image)
-
-    print("## Extraction of table - Extraction of cell data")
-    headings, row_entries = extract_cell_loc(final_image, box_data)
-
-    print("## Saving data in Table_data.txt")
+def table_writeback(headings, row_entries):
     open("Table_data.txt", "w").close()
     table_data = open("Table_data.txt", "a")
     table_data.write("HEADING: \n")
@@ -155,5 +136,42 @@ def main():
     table_data.close()
 
 
+def main():
+    path = "./images/table.jpg"
+    print("## Importing image")
+    try:
+        f = open(path)
+        initial_image = cv2.imread(path)
+        f.close()
+    except FileNotFoundError:
+        print("File not accessible")
+        print("\n### EXITING ###")
+        exit()
+
+    if initial_image.shape[1] > 640 and initial_image.shape[0] > 640:
+        scale_percent = 40  # percent of original size
+        width = int(initial_image.shape[1] * scale_percent / 100)
+        height = int(initial_image.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        initial_image = cv2.resize(
+            initial_image, dim, interpolation=cv2.INTER_AREA)
+
+    initial_image = cv2.copyMakeBorder(
+        initial_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, (0, 0, 0))
+
+    print("## Initial preprocessing of the image")
+    print("## Extraction of table - Detection of cells")
+    final_image, box_data = preprocess_and_extract_cells(initial_image)
+    cv2.imwrite("extracted_tables/table.png", final_image)
+
+    print("## Extraction of table - Extraction of cell data")
+    headings, row_entries = extract_cell_loc(initial_image, box_data)
+
+    print("## Saving data in Table_data.txt")
+    table_writeback(headings, row_entries)
+
+
 if __name__ == "__main__":
+    print("### Sequel Injector ###\n")
     main()
+    print("\n### Done ###")

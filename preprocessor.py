@@ -20,6 +20,10 @@ def image_thresholding(image):
         image, 150, 255, cv2.THRESH_BINARY_INV)[1]
 
 
+def image_inverse(image):
+    return cv2.bitwise_not(image)
+
+
 def image_canny(image):
     v = np.median(image)
 
@@ -28,38 +32,38 @@ def image_canny(image):
     return cv2.Canny(image, lower, upper)
 
 
-def detect_rect(image):
-    contours = cv2.findContours(
-        image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
+# def detect_rect(image):
+#     contours = cv2.findContours(
+#         image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
 
-    contours = sorted(
-        contours,
-        key=cv2.contourArea,
-        reverse=True
-    )[:5]
+#     contours = sorted(
+#         contours,
+#         key=cv2.contourArea,
+#         reverse=True
+#     )[:5]
 
-    return cv2.boundingRect(contours[0])
+#     return cv2.boundingRect(contours[0])
 
 
-def preprocess(initial_image):
+# def preprocess(initial_image):
 
-    gray = image_grayscale(initial_image)
+#     gray = image_grayscale(initial_image)
 
-    blur = image_blur(gray)
+#     blur = image_blur(gray)
 
-    thresh = image_thresholding(blur)
+#     thresh = image_thresholding(blur)
 
-    thresh = image_dilation(thresh)
+#     thresh = image_dilation(thresh)
 
-    print("## Cropped image and saved")
-    cv2.namedWindow("Final", cv2.WINDOW_NORMAL)
-    cv2.imshow("Final", thresh)
+#     print("## Cropped image and saved")
+#     cv2.namedWindow("Final", cv2.WINDOW_NORMAL)
+#     cv2.imshow("Final", thresh)
 
-    canny = image_canny(thresh)
-    print("## Cropped image and saved")
-    cv2.namedWindow("fa", cv2.WINDOW_NORMAL)
-    cv2.imshow("fa", canny)
-    return canny
+#     canny = image_canny(thresh)
+#     print("## Cropped image and saved")
+#     cv2.namedWindow("fa", cv2.WINDOW_NORMAL)
+#     cv2.imshow("fa", canny)
+#     return canny
 
 
 # def prep_main():

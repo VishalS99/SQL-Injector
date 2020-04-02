@@ -1,7 +1,12 @@
 HEADING: 
-Name	FName	City		Salary	
-Smith	John		35	$280	
-Doe	Jane		28	$325	
-Brown	Scott		41	$265	
-Howard	Shemp		48	$359	
-Taylor	Tom	o		$250	
+ID	NAME	CLASS	MARK	SEX	
+1	John Deo	Four	75	female	
+2	Max Ruin	Three	85	male	
+3	Arnold	Three	55	male	
+4	Krish Star	Four	60	female	
+5	John Mike	Four	60	female	
+6	Alex John	Four	55	male	
+7	My John Rob	Fifth	78	male	
+8	Asruid	Five	85	male	
+9	Tes Qry	Six	78	male	
+10	Big John	Four	55	female	
