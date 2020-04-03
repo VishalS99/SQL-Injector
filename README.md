@@ -7,7 +7,7 @@
 <h2>Dependencies</h2>
 <p>Based on <code>python 3.6+</code>.</p>
 <p>Run <code>pip install -r requirements.txt</code> to install all dependencies.</p>
-<h2>How to run?</h2>
+<h2>How to setup?</h2>
 <p><b>Create a virtual environment:</b></p>
 <ul>
     <li>Installing <b>virtualenv</b> : <code>pip3 install virtualenv</code>
@@ -17,6 +17,14 @@
 </ul>
 <p>Install all dependencies.</p>
 <p>Set up <code>config.js</code> by copying contents of config.example.json to config.json and fill in username and password of your database client.</p>
-<p>Run <code>python extractor.py.</code></p>
 
-<h4>Have Fun</h4>
+<h2>Arguments</h2>
+<ul>
+    <li><code>-p/ --path</code>: Path of the image to be processed</li>
+    <li><code>-db/ --database</code>: Name of the database</li>
+    <li><code>-t/ --table</code>: Name of the table</li>
+</ul>
+<h2>Executing the script:</h2>
+<p>Run <code>python injector.py</code> with respective arguments.</p>
+
+<h3>=====================<br>Have Fun <br>=====================</h3>

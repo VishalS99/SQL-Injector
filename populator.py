@@ -6,8 +6,8 @@ try:
     with open('config.json') as config_file:
         data = json.load(config_file)
 except:
-    print("Config doesnt exist")
-    exit(0)
+    print("\nxx Config doesnt exist\n")
+    exit(1)
 
 
 def determine_mysql_datatype(type):
@@ -18,7 +18,7 @@ def determine_mysql_datatype(type):
     if type == 2:
         return "DATE"
     else:
-        print("Wrong option!!")
+        print("\nxx Wrong option!!\n")
         determine_mysql_datatype(type)
 
 
@@ -32,11 +32,12 @@ def connect_database(db_name):
         cursor = db.cursor()
         cursor.execute("CREATE DATABASE IF NOT EXISTS " + db_name)
         cursor.execute("USE " + db_name)
-        print("## Created database connection to mysql")
+        print("===> Created database connection to MySQL.\n")
+        print("===> Connected to database: " + db_name + "\n")
         return (cursor, db)
     except:
-        print("xx Failed to create connection to Mysql\n")
-        exit(0)
+        print("\nxx Failed to create connection to Mysql.\n\n")
+        exit(1)
 
 
 def create_table(db, cursor, headings, table_name):
@@ -54,17 +55,18 @@ def create_table(db, cursor, headings, table_name):
             entries += head + " " + datatype + " PRIMARY KEY,"
         else:
             entries = entries + head + " " + datatype + ","
+        print("\n")
     query = "CREATE TABLE " + table_name + " (" + entries[:-1] + ")"
     try:
         cursor.execute(query)
         db.commit()
     except:
         db.rollback()
-        print("Failed to execute the query!!")
+        print("\nxx Failed to execute the query!!\n")
     return type_list
 
 
-def populator(db, cursor, table_name, headings, row_entries):
+def data_populator(db, cursor, table_name, headings, row_entries):
     type_list = create_table(db, cursor, headings, table_name)
 
     sql_queries = "INSERT INTO " + table_name + " VALUES("
@@ -83,28 +85,20 @@ def populator(db, cursor, table_name, headings, row_entries):
 
     for record in row_entries:
         records.append(tuple(record))
-    cursor.executemany(sql_queries, records)
-    db.commit()
+
+    try:
+        cursor.executemany(sql_queries, records)
+        db.commit()
+    except:
+        db.rollback()
+        print("\nxx Cannot commit queries.\n")
 
 
-def main():
-    # path = './images/tt.jpg'
-    path = input("Enter image path: ")
-    database_name = input("Enter the name of database: ")
-    # database_name = "sqlhelper"
-    table_name = input("Enter the name of table: ")
-    # table_name = "test1"
+def populator(path, database_name, table_name):
     (headings, row_entries) = extractor(path)
     print("## Extraction of table completed.\n")
-    print("## Adding entries to database")
+    print("## Adding entries to database.\n")
     (cursor, db) = connect_database(database_name)
-    populator(db, cursor, table_name, headings, row_entries)
-    print("## Successfully created " +
-          database_name + " and inserted all records!")
+    data_populator(db, cursor, table_name, headings, row_entries)
+    print("\n## Successfully created inserted all records into " + database_name + ".\n")
     db.close()
-
-
-if __name__ == "__main__":
-    print("### Sequel Injector ###\n")
-    main()
-    print("\n### Done ###")

@@ -1,5 +1,3 @@
-import os
-import numpy as np
 from preprocessor import *
 
 table_headings = []
@@ -8,12 +6,8 @@ table_row_elements = []
 try:
     import pytesseract
 except:
-    print("Cannot import Tesseract, either it's not installed or there is some other error")
-
-try:
-    import cv2
-except:
-    print("Cannot import Opencv, either it's not installed or there is some other error")
+    print("xx Cannot import Tesseract, either it's not installed or there is some other error\n")
+    exit(1)
 
 
 def sort_contours(cnts, method="l2r"):
@@ -67,7 +61,6 @@ def extract_cell_loc(image, box):
             countcol += 1
     countrow = int(len(box) / countcol)
 
-    print("### Detection of table titles")
     for i in range(countcol):
         (x, y, w, h) = box[i]
         text_image = image[y: y+h, x: x+w]
@@ -82,9 +75,8 @@ def extract_cell_loc(image, box):
 
         table_headings.append(text.replace("\n", ' '))
     table_headings.reverse()
-    print("=======> Heading Entry:", table_headings, "\n")
+    print("=======> Heading Entry: ", table_headings, ".\n")
 
-    print("### Detection of table entries")
     for i in range(1, countrow):
         row_entry = []
         for j in range(countcol):
@@ -102,7 +94,7 @@ def extract_cell_loc(image, box):
 
             row_entry.append(text.replace("\n", ' '))
         row_entry.reverse()
-        print("=======> Row Entry: ", row_entry, "\n")
+        print("=======> Row Entry ", i, ": ", row_entry, ".\n")
         table_row_elements.append(row_entry)
 
     return (table_headings, table_row_elements)
@@ -137,15 +129,8 @@ def table_writeback(headings, row_entries):
 
 
 def extractor(path):
-    print("## Importing image")
-    try:
-        f = open(path)
-        initial_image = cv2.imread(path)
-        f.close()
-    except FileNotFoundError:
-        print("File not accessible")
-        print("\n### EXITING ###")
-        exit()
+    print("## Importing image from:" + path + ".\n")
+    initial_image = cv2.imread(path)
 
     if initial_image.shape[1] > 640 and initial_image.shape[0] > 640:
         scale_percent = 40  # percent of original size
@@ -158,14 +143,14 @@ def extractor(path):
     initial_image = cv2.copyMakeBorder(
         initial_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, (0, 0, 0))
 
-    print("## Initial preprocessing of the image")
-    print("## Extraction of table - Detection of cells")
+    print("## Initial preprocessing of the image.\n")
+    print("## Extraction of table - Detection of cells.\n")
     final_image, box_data = preprocess_and_extract_cells(initial_image)
     cv2.imwrite("extracted_tables/table.png", final_image)
 
-    print("## Extraction of table - Extraction of cell data")
+    print("## Extraction of table - Extraction of cell data.\n")
     headings, row_entries = extract_cell_loc(initial_image, box_data)
 
-    print("## Saving data in Table_data.txt")
+    print("## Saving data in Table_data.txt.\n")
     table_writeback(headings, row_entries)
     return (headings, row_entries)

@@ -1,4 +1,8 @@
-import cv2
+import os
+try:
+    import cv2
+except:
+    print("xx Cannot import Opencv, either it's not installed or there is some other error\n")
 import numpy as np
 
 
