@@ -30,7 +30,7 @@ def connect_database(db_name):
             passwd=data["password"]
         )
         cursor = db.cursor()
-        cursor.execute("CREATE DATABASE " + db_name)
+        cursor.execute("CREATE DATABASE IF NOT EXISTS " + db_name)
         cursor.execute("USE " + db_name)
         print("## Created database connection to mysql")
         return (cursor, db)
