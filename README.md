@@ -1,7 +1,7 @@
-<center><h1><b>SequelInjector <span style="color:#22d8dd ">&#129302;</span> </b></h1>
+<h1><b>SequelInjector <span style="color:#22d8dd ">&#129302;</span> </b></h1>
 
 <p>
-An automated tool that autopopulates the database from entries in a table image, based on OpenCV and PyTesseract.
+    An automated tool that autopopulates the database from entries in a table image, based on OpenCV and PyTesseract.
 </p>
 <br>
 <h2>Dependencies</h2>
@@ -16,6 +16,5 @@ An automated tool that autopopulates the database from entries in a table image,
     <li>Activating <b>env</b>: <code>source env/bin/activate</code></li>
 </ul>
 <p>Install all dependencies.</p>
+<p>Set up <code>config.js</code> by copying contents of config.example.json to config.json and fill in username and password of your database client.</p>
 <p>Run <code>python extractor.py.</code></p>
-
-</center>
