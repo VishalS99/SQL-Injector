@@ -30,13 +30,12 @@ def connect_database(db_name):
             passwd=data["password"]
         )
         cursor = db.cursor()
-        print("Craeted conne")
         cursor.execute("CREATE DATABASE " + db_name)
         cursor.execute("USE " + db_name)
         print("## Created database connection to mysql")
         return (cursor, db)
     except:
-        print("xx Failed to create connection to Mysql")
+        print("xx Failed to create connection to Mysql\n")
         exit(0)
 
 
@@ -56,7 +55,6 @@ def create_table(db, cursor, headings, table_name):
         else:
             entries = entries + head + " " + datatype + ","
     query = "CREATE TABLE " + table_name + " (" + entries[:-1] + ")"
-    print(query)
     try:
         cursor.execute(query)
         db.commit()
@@ -69,30 +67,40 @@ def create_table(db, cursor, headings, table_name):
 def populator(db, cursor, table_name, headings, row_entries):
     type_list = create_table(db, cursor, headings, table_name)
 
-    # sql_queries = "INSERT INTO " + table_name + " VALUES("
-    # for j in range(len(row_entries[0])):
-    #     if type_list[j] == "INT":
-    #         sql_queries += "%d,"
-    #     elif type_list[j] == "VARCHAR(255)":
-    #         sql_queries += "%s,"
-    #     elif type_list[j] == "DATE":
-    #         sql_queries += "%d,"
-    # sql_queries = sql_queries[:-1] + ")"
+    sql_queries = "INSERT INTO " + table_name + " VALUES("
+    for j in range(len(type_list)):
+        sql_queries += "%s,"
+    sql_queries = sql_queries[:-1] + ")"
+
+    records = []
+    for record in row_entries:
+        for j in range(len(record)):
+            if type_list[j] != "VARCHAR(255)":
+                if record[j][0].isdigit() == 0:
+                    record[j] = int(record[j][1:])
+                else:
+                    record[j] = int(record[j])
+
+    for record in row_entries:
+        records.append(tuple(record))
+    cursor.executemany(sql_queries, records)
+    db.commit()
 
 
 def main():
-    path = './images/tt.jpg'
-    # path = input("Enter image path: ")
-    # database_name = input("Enter the name of database: ")
-    database_name = "sqlhelper"
-    # table_name = input("Enter the name of table: ")
-    table_name = "test1"
+    # path = './images/tt.jpg'
+    path = input("Enter image path: ")
+    database_name = input("Enter the name of database: ")
+    # database_name = "sqlhelper"
+    table_name = input("Enter the name of table: ")
+    # table_name = "test1"
     (headings, row_entries) = extractor(path)
     print("## Extraction of table completed.\n")
     print("## Adding entries to database")
     (cursor, db) = connect_database(database_name)
     populator(db, cursor, table_name, headings, row_entries)
-    print("## Added table into database " + database_name)
+    print("## Successfully created " +
+          database_name + " and inserted all records!")
     db.close()
 
 
