@@ -23,6 +23,7 @@
     <li><code>-p/ --path</code>: Path of the image to be processed</li>
     <li><code>-db/ --database</code>: Name of the database</li>
     <li><code>-t/ --table</code>: Name of the table</li>
+    <li><code>-s/ --shade</code>: 0 if heading is not, 1 if heading is dark</li>
 </ul>
 <h2>Executing the script:</h2>
 <p>Run <code>python injector.py</code> with respective arguments.</p>

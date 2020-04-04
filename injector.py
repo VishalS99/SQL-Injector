@@ -1,7 +1,10 @@
 from populator import populator
 
+shade = 0
+
 
 def argumentparser():
+    global shade
     try:
         import argparse
         import sys
@@ -17,6 +20,7 @@ def argumentparser():
                         help='Name of database')
     parser.add_argument(
         '-t', '--table', help='Name of the table')
+    parser.add_argument('-s', '--shade', help="Shade of heading", default=0)
 
     if len(sys.argv) > 1:
         args = parser.parse_args()
@@ -32,6 +36,7 @@ def argumentparser():
             args.database) != 0 else input("Enter the name of database: ")
         table_name = args.table if len(args.table) != 0 else input(
             "Enter the name of table: ")
+        shade = args.shade
     else:
         path = input("Enter image path: ")
         try:
@@ -48,7 +53,7 @@ def argumentparser():
 def main():
     print("\n==================== SEQUEL INJECTOR ====================\n")
     path, database_name, table_name = argumentparser()
-    populator(path, database_name, table_name)
+    populator(path, database_name, table_name, shade)
     print("\n=========================================================\n")
 
 

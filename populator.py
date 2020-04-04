@@ -94,11 +94,12 @@ def data_populator(db, cursor, table_name, headings, row_entries):
         print("\nxx Cannot commit queries.\n")
 
 
-def populator(path, database_name, table_name):
-    (headings, row_entries) = extractor(path)
+def populator(path, database_name, table_name, shade):
+    (headings, row_entries) = extractor(path, shade)
     print("## Extraction of table completed.\n")
     print("## Adding entries to database.\n")
     (cursor, db) = connect_database(database_name)
     data_populator(db, cursor, table_name, headings, row_entries)
-    print("\n## Successfully created inserted all records into " + database_name + ".\n")
+    print("\n## Successfully created inserted all records into " +
+          database_name + ".\n")
     db.close()

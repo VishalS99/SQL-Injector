@@ -2,7 +2,7 @@ from preprocessor import *
 
 table_headings = []
 table_row_elements = []
-
+box = []
 try:
     import pytesseract
 except:
@@ -30,8 +30,6 @@ def detect_cells(image, orig):
 
     contours, boundingBoxes = sort_contours(contours, "t2b")
     heights = [boundingBoxes[i][3] for i in range(len(boundingBoxes))]
-
-    box = []
 
     max_height_threshold = 80
     min_height_threshold = 22
@@ -100,10 +98,12 @@ def extract_cell_loc(image, box):
     return (table_headings, table_row_elements)
 
 
-def preprocess_and_extract_cells(initial_image):
+def preprocess_and_extract_cells(initial_image, flag):
 
-    gray = image_grayscale(initial_image)
-
+    if flag == 0:
+        gray = image_grayscale(initial_image)
+    else:
+        gray = image_inverse(image_grayscale(initial_image))
     thresh = image_thresholding(gray)
 
     dilation = image_dilation(thresh)
@@ -128,7 +128,7 @@ def table_writeback(headings, row_entries):
     table_data.close()
 
 
-def extractor(path):
+def extractor(path, shade):
     print("## Importing image from:" + path + ".\n")
     initial_image = cv2.imread(path)
 
@@ -140,12 +140,17 @@ def extractor(path):
         initial_image = cv2.resize(
             initial_image, dim, interpolation=cv2.INTER_AREA)
 
-    initial_image = cv2.copyMakeBorder(
-        initial_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, (0, 0, 0))
+#    initial_image = cv2.copyMakeBorder(
+#       initial_image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, (0, 0, 0))
 
     print("## Initial preprocessing of the image.\n")
     print("## Extraction of table - Detection of cells.\n")
-    final_image, box_data = preprocess_and_extract_cells(initial_image)
+    if shade:
+        final_image, box_data = preprocess_and_extract_cells(initial_image, 1)
+        final_image, box_data = preprocess_and_extract_cells(initial_image, 0)
+    else:
+        final_image, box_data = preprocess_and_extract_cells(initial_image, 0)
+        final_image, box_data = preprocess_and_extract_cells(initial_image, 1)
     cv2.imwrite("extracted_tables/table.png", final_image)
 
     print("## Extraction of table - Extraction of cell data.\n")
