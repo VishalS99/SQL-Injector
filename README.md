@@ -1,4 +1,4 @@
-<h1><b>Sequel Injector <span style="color:#22d8dd ">&#129302;</span> </b></h1>
+<h1><b>Smart SQLizer <span style="color:#22d8dd ">&#129302;</span> </b></h1>
 
 <p>
     An automated tool that autopopulates the database from entries in a table image, based on OpenCV and PyTesseract.
